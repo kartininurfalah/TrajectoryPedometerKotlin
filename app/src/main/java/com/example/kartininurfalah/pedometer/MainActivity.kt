@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
             simpleStepDetector!!.updateAccelerometer(event.timestamp, event.values[0], event.values[1], event.values[2])
 
              //we need to use a low pass filter to make data smoothed
-            smoothed = LowPassFilter.filter(event.values, gravity)
+            smoothed = LowPassFilter.filter(event.values, gravity, 3)
             gravity[0] = smoothed[0]
             gravity[1] = smoothed[1]
             gravity[2] = smoothed[2]
@@ -141,15 +141,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
             yAccelValue.text = "yAccelValue: " + event.values[1]
             zAccelValue.text = "zAccelValue: " + event.values[2]
         } else if (event!!.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            smoothed = LowPassFilter.filter(event.values, geomagnetic)
+            smoothed = LowPassFilter.filter(event.values, geomagnetic, 3)
             geomagnetic[0] = smoothed[0]
             geomagnetic[1] = smoothed[1]
             geomagnetic[2] = smoothed[2]
             accelOrMagnetic = true
 
         }else if (event!!.sensor.type == Sensor.TYPE_PRESSURE) {
-            smoothed = LowPassFilter.filter(event.values, pressureBarometer)
-            pressureBarometer[0] = smoothed[0]
+            /*smoothed = LowPassFilter.filter(event.values, pressureBarometer)
+            pressureBarometer[0] = smoothed[0]*/
+            val s = LowPassFilter.filter(event.values, pressureBarometer, 1)
+            pressureBarometer[0] = s[0]
 
             Log.d(TAG, "onSensorChanged: Pressure: " + event.values[0])
 
