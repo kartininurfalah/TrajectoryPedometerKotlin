@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/tvHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="@string/app_name"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="20sp" />
+
+    <LinearLayout
+        android:id="@+id/firstLinear"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvHeader"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="120sp"
+            android:layout_height="wrap_content"
+            android:id="@+id/xAccelValue" />
+        <TextView
+            android:layout_width="120sp"
+            android:layout_height="wrap_content"
+            android:id="@+id/yAccelValue"/>
+        <TextView
+            android:layout_width="120sp"
+            android:layout_height="wrap_content"
+            android:id="@+id/zAccelValue" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/secondLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/firstLinear"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="120sp"
+            android:layout_height="wrap_content"
+            android:id="@+id/xMagnoValue" />
+        <TextView
+            android:layout_width="120sp"
+            android:layout_height="wrap_content"
+            android:id="@+id/yMagnoValue"/>
+        <TextView
+            android:layout_width="120sp"
+            android:layout_height="wrap_content"
+            android:id="@+id/zMagnoValue" />
+
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:id="@+id/thirdLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/secondLayout"
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:layout_width="140sp"
+            android:layout_height="wrap_content"
+            android:id="@+id/pressure"/>
+
+        <TextView
+            android:id="@+id/textCompas"
+            android:layout_width="140sp"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:gravity="center"/>
+
+        <Spinner
+            android:id="@+id/threshold_spinner"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:entries="@array/threshold_arrays"
+            android:prompt="@string/threshold_prompt"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/fourthLayout"
+        android:layout_width="380dp"
+        android:layout_height="260dp"
+        android:layout_below="@+id/thirdLayout"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp"
+        android:paddingLeft="0dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+        <!--android:layout_marginTop="0sp"-->
+
+        <com.example.kartininurfalah.pedometer.CompassView
+            android:id="@+id/imageCompas"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="0sp"
+            android:alpha=".75"
+            android:scaleType="fitCenter" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/waktu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_weight="0.09"
+        android:text="@string/timerVal"/>
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/tvHeader"
+        android:background="@color/colorPrimary" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/tvSteps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fourthLayout"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="-6dp"
+        android:gravity="center"
+        android:textColor="@color/colorPrimary"
+        android:textSize="18sp" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/btnStart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btnStop"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/btn_background"
+        android:text="@string/start_pedometer"
+        android:textColor="@android:color/white" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/btnStop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        android:background="@drawable/btn_background"
+        android:text="@string/stop_pedometer"
+        android:textColor="@android:color/white" />
+
+</RelativeLayout>
