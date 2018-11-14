@@ -13,14 +13,20 @@ import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
 import com.example.kartininurfalah.pedometer.listener.StepListener
+import com.example.kartininurfalah.pedometer.utils.SVMStepDetector
 import com.example.kartininurfalah.pedometer.utils.StepDetector
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
 
     private var simpleStepDetector: StepDetector? = null
     //sensor manager
     private var sensorManager: SensorManager? = null
+
     //Gravity for accelerometer data
     private val gravity = FloatArray(3)
     //magnetic data
@@ -54,11 +60,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
     //IMAGE
     lateinit var imageCompassView: ImageView
     private var compassView: CompassView? = null
-    //array SVM
-    private val SVM = arrayOf<Float>()
-    fun kuadrat(x: Float, y: Float, z: Float) {
-        val sum = (x*x) + (y*y) + (z*z)
-    }
+
     //pedometer
     private var startTime = 0L
     internal var timeInMiliseconds = 0L
@@ -89,6 +91,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
     val NA = "N/A"
     val FIXED = "FIXED"
 
+    val offset = 1.0
+    var currentPostion = Position(0.0, 0.0, 0.0)
+    var posList = mutableListOf(currentPostion)
 
     private val processSensors = object : Runnable {
         override fun run() {
@@ -126,7 +131,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
         var accelOrMagnetic = false
 
         if (event!!.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            simpleStepDetector!!.updateAccelerometer(event.timestamp, event.values[0], event.values[1], event.values[2])
 
              //we need to use a low pass filter to make data smoothed
             smoothed = LowPassFilter.filter(event.values, gravity, 3)
@@ -137,9 +141,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
             accelOrMagnetic = true
             Log.d(TAG, "onSensorChanged: X: " + event.values[0] + "Y: " + event.values[1] + "Z: " + event.values[2])
 
-            xAccelValue.text = "xAccelValue: " + event.values[0]
-            yAccelValue.text = "yAccelValue: " + event.values[1]
-            zAccelValue.text = "zAccelValue: " + event.values[2]
+            xAccelValue.text = "xAccelValue: " + gravity[0]
+            yAccelValue.text = "yAccelValue: " + gravity[1]
+            zAccelValue.text = "zAccelValue: " + gravity[2]
+            simpleStepDetector!!.updateAccelerometer(event.timestamp, gravity[0], gravity[1], gravity[2])
+
         } else if (event!!.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             smoothed = LowPassFilter.filter(event.values, geomagnetic, 3)
             geomagnetic[0] = smoothed[0]
@@ -155,7 +161,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
 
             Log.d(TAG, "onSensorChanged: Pressure: " + event.values[0])
 
-            pressureValue.text = "Pressure: " + event.values[0]
+            pressureValue.text = "Pressure: " + pressureBarometer[0]
         }
 
         //get rotation matrix to get gravity and magnetic data
@@ -214,10 +220,28 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
 
     override fun step(timeNs: Long) {
         numSteps++
+
+        val x = offset * sin(bearing)
+        val y = offset * cos(bearing)
+
+        val newPostition = Position(currentPostion.x + x, currentPostion.y + y, currentPostion.z)
+        currentPostion = newPostition
+        posList.add(newPostition)
+
         tvSteps.text = TEXT_NUM_STEPS.plus(numSteps)
+
+        savePedometer()
     }
 
-   override fun onCreate(savedInstanceState: Bundle?) {
+    private fun savePedometer() {
+
+
+        val ref = FirebaseDatabase.getInstance().getReference("pedometer")
+        val pedoId = ref.push().key
+
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 

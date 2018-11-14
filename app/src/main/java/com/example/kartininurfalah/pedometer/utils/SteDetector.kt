@@ -8,9 +8,9 @@ class StepDetector {
     private val VEL_RING_SIZE = 10
 
     // change this threshold according to your sensitivity preferences
-    private val STEP_THRESHOLD = 50f
+    private val STEP_THRESHOLD = 5f
 
-    private val STEP_DELAY_NS = 250000000
+    private val STEP_DELAY_NS = 500000000
 
     private var accelRingCounter = 0
     private val accelRingX = FloatArray(ACCEL_RING_SIZE)
@@ -50,7 +50,8 @@ class StepDetector {
         worldZ[1] = worldZ[1] / normalization_factor
         worldZ[2] = worldZ[2] / normalization_factor
 
-        val currentZ = SensorFilter().dot(worldZ, currentAccel) - normalization_factor
+        val currentZ = SensorFilter().dot(worldZ,
+                currentAccel) - normalization_factor
         velRingCounter++
         velRing[velRingCounter % VEL_RING_SIZE] = currentZ
 

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "207112779413",
+    "firebase_url": "https://pedometertrajectorydb.firebaseio.com",
+    "project_id": "pedometertrajectorydb",
+    "storage_bucket": "pedometertrajectorydb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:207112779413:android:9410e095903428e6",
+        "android_client_info": {
+          "package_name": "com.example.kartininurfalah.pedometer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "207112779413-5gns0lugijbsk4jkq3ruugbsdbakdn38.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.kartininurfalah.pedometer",
+            "certificate_hash": "95bce20f39b69106e8e580ed869b567404cd6b9b"
+          }
+        },
+        {
+          "client_id": "207112779413-ide7b15mrcn2ru8fult318grhvuto0gm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAprNzXpagYLBnsKt99QBwE9x6JbEo2vRk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "207112779413-ide7b15mrcn2ru8fult318grhvuto0gm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
