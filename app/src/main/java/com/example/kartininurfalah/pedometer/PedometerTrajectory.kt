@@ -1,9 +1,3 @@
 package com.example.kartininurfalah.pedometer
 
-class PedometerTrajectory() {
-    /*position: object {
-        var x = Int
-        var y = Int
-        var z = Int
-    }, angle : Float, numOfStep: Int*/
-}
+class PedometerTrajectory(val position: Position, val angel: Double, step: Int)

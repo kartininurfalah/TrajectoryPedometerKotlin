@@ -12,6 +12,7 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import com.example.kartininurfalah.pedometer.listener.StepListener
 import com.example.kartininurfalah.pedometer.utils.SVMStepDetector
 import com.example.kartininurfalah.pedometer.utils.StepDetector
@@ -72,7 +73,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
     val minutes: String? = null
     val seconds: String? = null
     val milliseconds: String? = null
-    var batas: Float = 0.toFloat()
     var hasil: String? = null
     lateinit var mySpinner: Spinner
     private var started = false
@@ -93,7 +93,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
 
     val offset = 1.0
     var currentPostion = Position(0.0, 0.0, 0.0)
-    var posList = mutableListOf(currentPostion)
+
+    val pedoRef = FirebaseDatabase.getInstance().getReference("pedometer")
+    var pedoChild = pedoRef
 
     private val processSensors = object : Runnable {
         override fun run() {
@@ -221,23 +223,24 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
     override fun step(timeNs: Long) {
         numSteps++
 
-        val x = offset * sin(bearing)
-        val y = offset * cos(bearing)
+        val x = offset * sin(90 - bearing)
+        val y = offset * cos(90 - bearing)
 
-        val newPostition = Position(currentPostion.x + x, currentPostion.y + y, currentPostion.z)
+        val newPostition = Position(currentPostion.x + x, currentPostion.y + y, pressureBarometer[0].toDouble())
         currentPostion = newPostition
-        posList.add(newPostition)
+
+        val trajectory = PedometerTrajectory(newPostition, bearing, numSteps)
 
         tvSteps.text = TEXT_NUM_STEPS.plus(numSteps)
 
-        savePedometer()
+        savePedometer(trajectory)
     }
 
-    private fun savePedometer() {
-
-
-        val ref = FirebaseDatabase.getInstance().getReference("pedometer")
-        val pedoId = ref.push().key
+    private fun savePedometer(position: PedometerTrajectory) {
+        pedoChild.push().setValue(position).addOnFailureListener {
+            it.printStackTrace()
+            Toast.makeText(this, "DB Failed", Toast.LENGTH_SHORT).show()
+        }
 
     }
 
@@ -301,27 +304,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
             pressureValue.text = "Pressure not suported"
         }
 
-        btnStart.setOnClickListener(View.OnClickListener {
+        btnStart.setOnClickListener {
             val i = 1
+            pedoChild = pedoRef.push()
             started = true
             numSteps = 0
-            hasil = mySpinner.selectedItem.toString()
-            Log.d(TAG,"hasil: " + hasil)
-            batas = java.lang.Float.parseFloat(hasil)
+            val threshold = mySpinner.selectedItem.toString()
+//            hasil = mySpinner.selectedItem.toString()
+//            Log.d(TAG,"hasil: " + hasil)
+            simpleStepDetector?.STEP_THRESHOLD = threshold.toFloat()
             startTime = SystemClock.uptimeMillis()
             //SVM[i] = Math.sqrt(kuadrat(x = xAccelValue, y = yAccelValue, z = zAccelValue))
             handler!!.removeCallbacks(updateTimerThread)
             handler!!.postDelayed(updateTimerThread, 0)
             sensorManager!!.registerListener(this, sensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST)
-            sensorManager!!.registerListener(this, sensorManager!!.getDefaultSensor(Sensor.TYPE_PRESSURE), SensorManager.SENSOR_DELAY_FASTEST)
-        })
+            sensorManager!!.registerListener(this, sensorManager!!.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL)
+            sensorManager!!.registerListener(this, sensorManager!!.getDefaultSensor(Sensor.TYPE_PRESSURE), SensorManager.SENSOR_DELAY_NORMAL)
+        }
 
-        btnStop.setOnClickListener(View.OnClickListener {
+        btnStop.setOnClickListener {
             timeSwapBuff += timeInMiliseconds
             handler!!.removeCallbacks(updateTimerThread)
             started = false
             sensorManager!!.unregisterListener(this)
-        })
+        }
     }
 
 }
