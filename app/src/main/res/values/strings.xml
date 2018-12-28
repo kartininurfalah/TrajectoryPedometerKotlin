@@ -2,28 +2,29 @@
     <string name="app_name">Pedometer</string>
     <string name="start_pedometer">Start Pedometer</string>
     <string name="stop_pedometer">Stop Pedometer</string>
+    <string name="reset_pedometer">Reset Pedometer</string>
     <string name="threshold_prompt">Threshold</string>
     <string-array name="threshold_arrays">
+        <item>0.0001</item>
+        <item>0.0002</item>
+        <item>0.0003</item>
+        <item>0.0004</item>
+        <item>0.0005</item>
+        <item>0.001</item>
+        <item>0.002</item>
+        <item>0.003</item>
+        <item>0.004</item>
+        <item>0.005</item>
+        <item>0.01</item>
+        <item>0.02</item>
+        <item>0.03</item>
+        <item>0.04</item>
+        <item>0.05</item>
         <item>1</item>
         <item>2</item>
         <item>3</item>
         <item>4</item>
         <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>10</item>
-        <item>11</item>
-        <item>12</item>
-        <item>13</item>
-        <item>14</item>
-        <item>15</item>
-        <item>16</item>
-        <item>17</item>
-        <item>18</item>
-        <item>19</item>
-        <item>20</item>
     </string-array>
 
     <string name="timerVal">00:00:00</string>

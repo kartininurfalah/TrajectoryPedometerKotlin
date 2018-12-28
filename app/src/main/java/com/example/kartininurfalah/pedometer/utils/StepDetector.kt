@@ -10,7 +10,7 @@ class StepDetector {
     // change this threshold according to your sensitivity preferences
     var STEP_THRESHOLD = 3f
 
-    private val STEP_DELAY_NS = 250000000
+    private val STEP_DELAY_NS = 1000000000
 
     private var accelRingCounter = 0
     private val accelRingX = FloatArray(ACCEL_RING_SIZE)

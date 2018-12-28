@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "207112779413",
-    "firebase_url": "https://pedometertrajectorydb.firebaseio.com",
-    "project_id": "pedometertrajectorydb",
-    "storage_bucket": "pedometertrajectorydb.appspot.com"
+    "project_number": "311097764855",
+    "firebase_url": "https://pedometer-ta.firebaseio.com",
+    "project_id": "pedometer-ta",
+    "storage_bucket": "pedometer-ta.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:207112779413:android:9410e095903428e6",
+        "mobilesdk_app_id": "1:311097764855:android:9410e095903428e6",
         "android_client_info": {
           "package_name": "com.example.kartininurfalah.pedometer"
         }
       },
       "oauth_client": [
         {
-          "client_id": "207112779413-5gns0lugijbsk4jkq3ruugbsdbakdn38.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.kartininurfalah.pedometer",
-            "certificate_hash": "95bce20f39b69106e8e580ed869b567404cd6b9b"
-          }
-        },
-        {
-          "client_id": "207112779413-ide7b15mrcn2ru8fult318grhvuto0gm.apps.googleusercontent.com",
+          "client_id": "311097764855-vfb6p2h7lq5s93v693ac6csqc7512cpa.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAprNzXpagYLBnsKt99QBwE9x6JbEo2vRk"
+          "current_key": "AIzaSyD9RRUksVLVYh0MZ1kz-5OGR4kbLrNushM"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "207112779413-ide7b15mrcn2ru8fult318grhvuto0gm.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

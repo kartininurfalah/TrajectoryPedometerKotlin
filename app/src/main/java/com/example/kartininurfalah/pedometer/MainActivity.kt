@@ -2,6 +2,7 @@ package com.example.kartininurfalah.pedometer
 
 import android.content.Context
 import android.hardware.*
+import android.hardware.SensorManager.getAltitude
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.os.Bundle
@@ -9,10 +10,7 @@ import android.os.Handler
 import android.os.SystemClock
 import android.util.Log
 import android.view.WindowManager
-import android.widget.ImageView
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.example.kartininurfalah.pedometer.listener.StepListener
 import com.example.kartininurfalah.pedometer.utils.SVMStepDetector
 import com.example.kartininurfalah.pedometer.utils.StepDetector
@@ -21,6 +19,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
+import java.util.Timer
+import java.util.TimerTask
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
 
@@ -74,28 +76,66 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
     val seconds: String? = null
     val milliseconds: String? = null
     var hasil: String? = null
-    lateinit var mySpinner: Spinner
+//    lateinit var mySpinner: Spinner
+    private var mySpinner: EditText? = null
+
     private var started = false
 
-    internal var interval = 500 // 1000ms
+    internal var interval = 1000 // 1000ms
     internal var flag = false
     internal var handler: Handler? = null
 
-
+    //spinner
+//    val threshold = mySpinner!!.text.toString()
     //sensor gravity
     private val sensorGravity: Sensor? = null
     private val TEXT_NUM_STEPS = "Number of Steps: "
-    private var numSteps: Int = 0
+    var numSteps: Int = 0
 
     private val TAG = "MainActivity"
     val NA = "N/A"
     val FIXED = "FIXED"
 
     val offset = 1.0
-    var currentPostion = Position(0.0, 0.0, 0.0)
+    var x = 0.0
+    var y = 0.0
+    var timeSave = 0
+    var altitude = 0.0f
 
+    //pedometer
+    var currentPostion = Position(0.0, 0.0, 0.0)
+    //accell
+    var currentAccel = AccelerometerCalibration(0f, 0f, 0f)
+    //calculate svm for define threshold
+    var svm: Float = 0.0f
+
+    fun calculateSVM(x: Float, y: Float, z: Float): Float {
+        return sqrt((x*x) + (y*y) + (z*z))
+    }
+    //Pedometer
     val pedoRef = FirebaseDatabase.getInstance().getReference("pedometer")
     var pedoChild = pedoRef
+    //AccelThreshold
+    val pedoAccel = FirebaseDatabase.getInstance().getReference("AccelerometerThreshold")
+    var pedoChildAccel = pedoAccel
+    //All data pedometer and accelerometer threshold
+    val pedoRefAll = FirebaseDatabase.getInstance().getReference("accelerometer_pedometer")
+    var pedoChildAll = pedoRefAll
+
+    private fun hoam() {
+        System.out.println("Hello World!");
+        System.out.println("Hello World!");
+        System.out.println("Hello World!");
+        System.out.println("Hello World!");
+    }
+
+    var helloRunnable: Runnable = Runnable { println("Hello world") }
+
+    var executor = Executors.newScheduledThreadPool(1)
+    override fun getMainExecutor(): Executor {
+        return super.getMainExecutor()
+    }
+
 
     private val processSensors = object : Runnable {
         override fun run() {
@@ -106,8 +146,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
     }
     private val updateTimerThread = object : Runnable {
         override fun run() {
-
-
             timeInMiliseconds = SystemClock.uptimeMillis() - startTime
             updatedTime = timeSwapBuff + timeInMiliseconds
             var secs = (updatedTime / 1000).toInt()
@@ -148,6 +186,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
             zAccelValue.text = "zAccelValue: " + gravity[2]
             simpleStepDetector!!.updateAccelerometer(event.timestamp, gravity[0], gravity[1], gravity[2])
 
+//            x = x + cos(90 - bearing)
+//            y = y + sin(90 - bearing)
+
+            svm = calculateSVM(gravity[0], gravity[1], gravity[2])
+
+//            val newPosition = Position(0.0,0.0,0.0)
+//            currentPostion = newPosition
+
+            currentAccel = AccelerometerCalibration(gravity[0], gravity[1], gravity[2])
+            val trajectory = AccelerometerTrajectory(currentAccel, bearing,
+                    mySpinner!!.text.toString().toDouble(), svm , (numSteps) )
+
+//            saveAccelerometer(trajectory)
+
         } else if (event!!.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             smoothed = LowPassFilter.filter(event.values, geomagnetic, 3)
             geomagnetic[0] = smoothed[0]
@@ -161,9 +213,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
             val s = LowPassFilter.filter(event.values, pressureBarometer, 1)
             pressureBarometer[0] = s[0]
 
-            Log.d(TAG, "onSensorChanged: Pressure: " + event.values[0])
-
+            Log.d(TAG, "onSensorChanged: Pressure: " + pressureBarometer[0])
+//            altitude = getAltitude(SensorManager.PRESSURE_STANDARD_ATMOSPHERE, pressureBarometer[0]);
             pressureValue.text = "Pressure: " + pressureBarometer[0]
+//            pressureValue.text = "Pressure: " + altitude
         }
 
         //get rotation matrix to get gravity and magnetic data
@@ -220,20 +273,45 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
 
     }
 
+//    private fun ceil(x: Double): Double{
+//        return ceil(x)
+//    }
+
     override fun step(timeNs: Long) {
+
+        svm = calculateSVM(gravity[0], gravity[1], gravity[2])
+        val number:Double = x
+        val number3digits:Double = String.format("%.3f", number).toDouble()
+        val number2digits:Double = String.format("%.2f", number3digits).toDouble()
+        val solution:Double = String.format("%.1f", number2digits).toDouble()
+
+        x = solution
+
+        val numberY:Double = y
+        val number3digitsY:Double = String.format("%.3f", numberY).toDouble()
+        val number2digitsY:Double = String.format("%.2f", number3digitsY).toDouble()
+        val solutionY:Double = String.format("%.1f", number2digitsY).toDouble()
+
+        y = solutionY
+
+        val newPosition = Position(currentPostion.x + x, currentPostion.y + y, pressureBarometer[0].toDouble())
+//        val newPosition = Position(currentPostion.x + x, currentPostion.y + y, altitude.toDouble())
+        currentPostion = newPosition
+//
+//        val trajectory = PedometerTrajectory(newPostition, bearing, numSteps)
+//
+        val dataAccelerometer = AccelerometerCalibration(gravity[0], gravity[1], gravity[2])
+        val trajectory = PedometerTrajectory(pressureBarometer[0].toDouble(), bearing, numSteps)
+//        val trajectory = PedometerTrajectory(altitude.toDouble(), bearing, numSteps)
+
+        savePedometer(trajectory)
+
         numSteps++
-
-        val x = offset * sin(90 - bearing)
-        val y = offset * cos(90 - bearing)
-
-        val newPostition = Position(currentPostion.x + x, currentPostion.y + y, pressureBarometer[0].toDouble())
-        currentPostion = newPostition
-
-        val trajectory = PedometerTrajectory(newPostition, bearing, numSteps)
+        x = x + cos(90  - bearing)
+        y = y + sin(90 - bearing)
 
         tvSteps.text = TEXT_NUM_STEPS.plus(numSteps)
 
-        savePedometer(trajectory)
     }
 
     private fun savePedometer(position: PedometerTrajectory) {
@@ -241,12 +319,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
             it.printStackTrace()
             Toast.makeText(this, "DB Failed", Toast.LENGTH_SHORT).show()
         }
+    }
 
+    private fun saveAccelerometer(position: AccelerometerTrajectory) {
+        pedoChildAll.push().setValue(position).addOnFailureListener {
+            it.printStackTrace()
+            Toast.makeText(this, "DB Failed", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        tvSteps2.text = "x: " + currentPostion.x.toString() + " - y: " + currentPostion.y.toString()
 
        //handler
         handler = Handler()
@@ -266,7 +352,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
 
        //waktu
         timerValue = findViewById(R.id.waktu) as TextView
-        mySpinner = findViewById(R.id.threshold_spinner) as Spinner
+        mySpinner = findViewById(R.id.threshold_spinner) as EditText
 
        //accelerometer
         xAccelValue = findViewById(R.id.xAccelValue) as TextView
@@ -277,8 +363,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
         zMagnoValue = findViewById(R.id.zMagnoValue) as TextView
         pressureValue = findViewById(R.id.pressure) as TextView
 
+//        accelerometer = sensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         if (accelerometer != null) {
-            sensorManager!!.registerListener(this@MainActivity, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+            sensorManager!!.registerListener(this@MainActivity, accelerometer, SensorManager.SENSOR_DELAY_GAME)
             Log.d(TAG, "onCreate: Registered accelerometer listener")
         } else {
             xAccelValue.text = "Accelerometer not suported"
@@ -307,26 +394,65 @@ class MainActivity : AppCompatActivity(), SensorEventListener, StepListener {
         btnStart.setOnClickListener {
             val i = 1
             pedoChild = pedoRef.push()
+//            pedoChildAccel = pedoAccel.push()
+            pedoChildAll = pedoRefAll.push()
             started = true
             numSteps = 0
-            val threshold = mySpinner.selectedItem.toString()
+            val threshold = mySpinner!!.text.toString()
 //            hasil = mySpinner.selectedItem.toString()
 //            Log.d(TAG,"hasil: " + hasil)
             simpleStepDetector?.STEP_THRESHOLD = threshold.toFloat()
+
+            currentPostion = Position(0.0, 0.0, 0.0)
+
+            //SAVE DB
+//            x = x + cos(90 - bearing)
+//            y = y + sin(90 - bearing)
+//            svm = calculateSVM(gravity[0], gravity[1], gravity[2])
+//            val newPosition = Position(currentPostion.x + x, currentPostion.y + y, pressureBarometer[0].toDouble())
+//            currentPostion = newPosition
+//
+//            val accelerometerThreshold = AccelerometerCalibration(gravity[0], gravity[1], gravity[2])
+//            val trajectory = PedometerTrajectory(newPosition, accelerometerThreshold, bearing,
+//                    mySpinner.selectedItem.toString().toDouble(), svm , (numSteps) )
+//
+//            savePedometer(trajectory)
+
+            //START
             startTime = SystemClock.uptimeMillis()
-            //SVM[i] = Math.sqrt(kuadrat(x = xAccelValue, y = yAccelValue, z = zAccelValue))
             handler!!.removeCallbacks(updateTimerThread)
             handler!!.postDelayed(updateTimerThread, 0)
-            sensorManager!!.registerListener(this, sensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_FASTEST)
+            sensorManager!!.registerListener(this, sensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME)
             sensorManager!!.registerListener(this, sensorManager!!.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL)
             sensorManager!!.registerListener(this, sensorManager!!.getDefaultSensor(Sensor.TYPE_PRESSURE), SensorManager.SENSOR_DELAY_NORMAL)
         }
 
         btnStop.setOnClickListener {
+            tvSteps2.text = "x: " + currentPostion.x.toString() + " - y: " + currentPostion.y.toString()
+            currentPostion = Position(0.0, 0.0, 0.0)
+            x=0.0
+            y=0.0
             timeSwapBuff += timeInMiliseconds
             handler!!.removeCallbacks(updateTimerThread)
             started = false
             sensorManager!!.unregisterListener(this)
+        }
+
+        btnReset.setOnClickListener {
+            tvSteps2.text = "x: " + currentPostion.x.toString() + " - y: " + currentPostion.y.toString()
+            currentPostion = Position(0.0, 0.0, 0.0)
+            x=0.0
+            y=0.0
+
+            started = true
+            updatedTime = 0L
+            timeInMiliseconds = 0L
+            timeSwapBuff = 0L
+            startTime = SystemClock.uptimeMillis()
+            (findViewById(R.id.waktu) as TextView).text = "00:00:00"
+            tvSteps.text = TEXT_NUM_STEPS.plus("0")
+            sensorManager!!.registerListener(this, sensorManager!!.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL)
+
         }
     }
 

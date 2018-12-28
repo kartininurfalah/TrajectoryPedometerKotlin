@@ -12,7 +12,7 @@ package com.example.kartininurfalah.pedometer
 
 object LowPassFilter {
 
-    private val ALPHA = 0.2f
+    private val ALPHA = 0.094f
 
     /*fun filter(input: FloatArray, output: FloatArray?): FloatArray {
         if (output == null)
